@@ -13,32 +13,31 @@ let participantes = [];
 app.listen(port, () => console.log(`servidor esta rodando na porta ${port}`));
 
 // conexão com o banco de dados
-const mongoClient = new MongoClient("mongodb://localhost:27017/");
+const mongoClient = new MongoClient("mongodb://localhost:27017/participants");
 
 let db;
 mongoClient.connect()
 
-.then(() => db = mongoClient.db())
-.catch ((err) => console.log(err.massage));
+    .then(() => db = mongoClient.db())
+    .catch((err) => console.log(err.massage));
 
 let listaPaticipantes = [];
 app.get("/participants", (red, res) => {
     db.collection("participants").find().toArray()
-    .then(participants => {
-        return res.send(participants)
-    })
-    .catch( err => {
-        return res.status(500).send(err.massage);
-    })
-
+        .then(participants => {
+            return res.send(participants)
+        })
+        .catch(err => {
+            return res.status(500).send(err.massage);
+        })
 
     if (participantes.length === 0) {
         return res.send([])
     }
-    else{
-listaPaticipantes = participantes.slice();
+    else {
+        listaPaticipantes = participantes.slice();
     }
- res.send(listaPaticipantes);
+    res.send(listaPaticipantes);
 });
 
 
