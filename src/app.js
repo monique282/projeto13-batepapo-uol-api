@@ -25,25 +25,26 @@ let listaPaticipantes = [];
 app.get("/participants", (red, res) => {
     const promise = db.collection("participants").find().toArray()
     promise.then(participants => {
-        return res.send(participants)
+        if (participants.length === 0) {
+            return console.log("vazio")
+        }
+        else {
+            listaPaticipantes = participants.slice();
+            return res.send(listaPaticipantes);
+        }
+
     })
     promise.catch(err => {
         return res.status(500).send(err.massage);
     })
 
-    if (participantes.length === 0) {
-        return res.send([])
-    }
-    else {
-        listaPaticipantes = participantes.slice();
-    }
-    res.send(listaPaticipantes);
+
 });
 
 
 app.post("/participants", (req, res) => {
     const { name } = req.body;
-    
+
 
     // verificar se o nome esta como uma estringue vazia
     if (name === "") {
@@ -58,19 +59,19 @@ app.post("/participants", (req, res) => {
             return res.sendStatus(409);
 
             // se nao exixtir esse nome cadastrado vai fazer isso
-        } 
-            const nomeUsuario = {
-                name: req.body.name,
-                lastStatus: Date.now()
-            }
-            const promise = db.collection("participants").insertOne(nomeUsuario);
-            promise.then(() => {
-                return res.sendStatus(201);
-            })
-                .catch(err => {
-                    return res.status(500).send(err.massage);
-                });
-        
+        }
+        const nomeUsuario = {
+            name: req.body.name,
+            lastStatus: Date.now()
+        }
+        const promise = db.collection("participants").insertOne(nomeUsuario);
+        promise.then(() => {
+            return res.sendStatus(201);
+        })
+            promise.catch(err => {
+                return res.status(500).send(err.massage);
+            });
+
     })
         .catch((err) => {
             return res.status(500).send(err.message);
