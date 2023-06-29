@@ -90,7 +90,7 @@ app.post("/participants", (req, res) => {
     }
     const mensagePromise = db.collection("messages").insertOne(listaMessages);
     mensagePromise.then(() => {
-        return res.sendStatus(201);
+       
     })
     mensagePromise.catch(err => {
         return res.status(500).send(err.massage);
