@@ -2,18 +2,19 @@ import express from "express";
 import cors from "cors";
 import { MongoClient } from "mongodb";
 import dotenv from "dotenv";
+import dayjs from "dayjs"
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 dotenv.config();
-const dayjs = require('dayjs');
 const horario = dayjs().format('HH:mm:ss');
 const port = 5000;
 
 // array de todos os participantes
 let participantes = [];
 // cerve pra deixar a aplicação ligada na porta escolhida
+
 app.listen(port, () => console.log(`servidor esta rodando na porta ${port}`));
 
 // conexão com o banco de dados
