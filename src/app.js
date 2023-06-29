@@ -7,6 +7,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 dotenv.config();
+const dayjs = require('dayjs');
+const horario = dayjs().format('HH:mm:ss');
 const port = 5000;
 
 // array de todos os participantes
@@ -28,7 +30,7 @@ app.get("/participants", (red, res) => {
     const promise = db.collection("participants").find().toArray()
     promise.then(participants => {
         if (participants.length === 0) {
-            return console.log("vazio")
+            return console.log([])
         }
         else {
             listaPaticipantes = participants.slice();
@@ -41,21 +43,20 @@ app.get("/participants", (red, res) => {
     })
 
 
+
 });
 
 
 app.post("/participants", (req, res) => {
     const { name } = req.body;
 
-
     // verificar se o nome esta como uma estringue vazia
     if (name === "") {
         return res.sendStatus(422);
-
     }
     // verificar se o nome ja exixte 
-    const findParticipantPromise = db.collection("participants").findOne({ name: name });
-    findParticipantPromise.then((participant) => {
+    const participantPromise = db.collection("participants").findOne({ name: name });
+    participantPromise.then((participant) => {
         if (participant) {
             // existe esse nome cadastrado
             return res.sendStatus(409);
@@ -70,14 +71,29 @@ app.post("/participants", (req, res) => {
         promise.then(() => {
             return res.sendStatus(201);
         })
-            promise.catch(err => {
-                return res.status(500).send(err.massage);
-            });
+        promise.catch(err => {
+            return res.status(500).send(err.massage);
+        });
 
     })
-    findParticipantPromise.catch((err) => {
-            return res.status(500).send(err.message);
-        });
+    participantPromise.catch((err) => {
+        return res.status(500).send(err.message);
+    });
+
+    const listaMessages = {
+        from: name,
+		to: 'Todos',
+		text: 'entra na sala...',
+		type: 'status',
+		time: horario
+    }
+    const mensagePromise = db.collection("messages").insertOne(listaMessages);
+    mensagePromise.then(() => {
+        return res.sendStatus(201);
+    })
+    mensagePromise.catch(err => {
+        return res.status(500).send(err.massage);
+    });
 
 })
 
