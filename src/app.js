@@ -73,7 +73,7 @@ app.post("/participants", (req, res) => {
             });
 
     })
-        .catch((err) => {
+    findParticipantPromise.catch((err) => {
             return res.status(500).send(err.message);
         });
 
