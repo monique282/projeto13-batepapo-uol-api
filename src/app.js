@@ -23,13 +23,13 @@ mongoClient.connect()
 
 let listaPaticipantes = [];
 app.get("/participants", (red, res) => {
-    db.collection("participants").find().toArray()
-        .then(participants => {
-            return res.send(participants)
-        })
-        .catch(err => {
-            return res.status(500).send(err.massage);
-        })
+    const promise = db.collection("participants").find().toArray()
+    promise.then(participants => {
+        return res.send(participants)
+    })
+    promise.catch(err => {
+        return res.status(500).send(err.massage);
+    })
 
     if (participantes.length === 0) {
         return res.send([])
@@ -41,7 +41,42 @@ app.get("/participants", (red, res) => {
 });
 
 
+app.post("/participants", (req, res) => {
+    const { name } = req.body;
+    
 
+    // verificar se o nome esta como uma estringue vazia
+    if (name === "") {
+        return res.sendStatus(422);
+
+    }
+    // verificar se o nome ja exixte 
+    const findParticipantPromise = db.collection("participants").findOne({ name: name });
+    findParticipantPromise.then((participant) => {
+        if (participant) {
+            // existe esse nome cadastrado
+            return res.sendStatus(409);
+
+            // se nao exixtir esse nome cadastrado vai fazer isso
+        } 
+            const nomeUsuario = {
+                name: req.body.name,
+                lastStatus: Date.now()
+            }
+            const promise = db.collection("participants").insertOne(nomeUsuario);
+            promise.then(() => {
+                return res.sendStatus(201);
+            })
+                .catch(err => {
+                    return res.status(500).send(err.massage);
+                });
+        
+    })
+        .catch((err) => {
+            return res.status(500).send(err.message);
+        });
+
+})
 
 
 
