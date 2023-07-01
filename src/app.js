@@ -167,16 +167,50 @@ app.get("/messages", async (req, res) => {
 app.post("/status", async (req, res) => {
     const { user } = req.headers;
     console.log(user);
- if (!user){
-    return res.sendStatus(404);
- }else{
+    if (!user) {
+        return res.sendStatus(404);
+    } else {
+        try {
+            const mudando = await db.collection("participants").finOne({ name: user });
+            if (!mudando) {
+                return res.sendStatus(404)
+            }
+            // atualizando o horario
+            await db.collection("participants").insertOne(
+                { name: user },
+                { $set: { lastStatus: Date.now() } }
+            )
+            return res.sendStatus(200);
+        } catch {
+            return res.status(500).send(err.message);
+        }
 
+    }
 
-
- }
- return res.sendStatus(200);
 
 })
+
+setInterval(function () {
+    app.get("/participants", (req, res) => {
+        const promise = db.collection("participants").find().toArray()
+        promise.then(participants => {
+            if (participants.length === 0) {
+                return res.send([]);
+            } else {
+                listaPaticipantes = participants.slice();
+                return res.send(listaPaticipantes);
+            }
+        })
+        promise.catch(err => {
+            return res.status(500).send(err.message);
+        })
+    });
+
+
+
+
+}, 15000);
+
 
 
 
