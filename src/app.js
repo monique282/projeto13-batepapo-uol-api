@@ -169,7 +169,7 @@ app.post("/status", async (req, res) => {
     console.log(user);
     if (!user) {
         return res.sendStatus(404);
-    } else {
+    }
         try {
             const mudando = await db.collection("participants").finOne({ name: user });
             if (!mudando) {
@@ -184,9 +184,6 @@ app.post("/status", async (req, res) => {
         } catch {
             return res.status(500).send(err.message);
         }
-
-    }
-
 
 })
 
@@ -205,9 +202,6 @@ setInterval(function () {
             return res.status(500).send(err.message);
         })
     });
-
-
-
 
 }, 15000);
 
