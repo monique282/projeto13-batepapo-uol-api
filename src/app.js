@@ -37,20 +37,15 @@ app.get("/participants", (red, res) => {
             listaPaticipantes = participants.slice();
             return res.send(listaPaticipantes);
         }
-
     })
     promise.catch(err => {
         return res.status(500).send(err.massage);
     })
-
-
-
 });
 
 
 app.post("/participants", (req, res) => {
     const { name } = req.body;
-
     // verificar se o nome esta como uma estringue vazia
     if (name === "") {
         return res.sendStatus(422);
@@ -61,7 +56,6 @@ app.post("/participants", (req, res) => {
         if (participant) {
             // existe esse nome cadastrado
             return res.sendStatus(409);
-
             // se nao exixtir esse nome cadastrado vai fazer isso
         }
         const nomeUsuario = {
@@ -75,30 +69,34 @@ app.post("/participants", (req, res) => {
         promise.catch(err => {
             return res.status(500).send(err.massage);
         });
-
     })
     participantPromise.catch((err) => {
         return res.status(500).send(err.message);
     });
 
-    const listaMessages = {
+    const mensagem  = {
         from: name,
-		to: 'Todos',
-		text: 'entra na sala...',
-		type: 'status',
-		time: horario
+        to: 'Todos',
+        text: 'entra na sala...',
+        type: 'status',
+        time: horario
     }
-    const mensagePromise = db.collection("messages").insertOne(listaMessages);
+    const mensagePromise = db.collection("messages").insertOne(mensagem);
     mensagePromise.then(() => {
-       
+
     })
     mensagePromise.catch(err => {
         return res.status(500).send(err.massage);
     });
-
 })
 
+// app.post("/messages", (req, res) => {
 
+//     const { to } = req.body;
+//     const { text } = req.body;
+//     const { type } = req.body;
+
+// })
 
 
 
