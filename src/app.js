@@ -100,21 +100,43 @@ app.post("/messages", async (req, res) => {
         type: joi.valid('message', 'private_message').required()
     })
 
-    const validarCamposDasMensagens= camposDasMensagens.validate(req.body, { abortEarly: false });
+    const validarCamposDasMensagens = camposDasMensagens.validate(req.body, { abortEarly: false });
     // o abortEarly ser pra procurar todos os requisitos que nao passou no joi
     if (validarCamposDasMensagens.error) {
         const errocamposDasMensagens = validarCamposDasMensagens.error.details.map(qual => qual.message);
         return res.sendStatus(422).send(erroNome);
     }
-    const participantsCollection = db.collection('/participants');
 
-    // Verifica se o participante existe na lista de participantes
-    const participantExists = await participantsCollection.findOne({ participants: { $in: [from] } });
+    try {
+        //pega a lista de participantes
+        const participantsCollection = db.collection('/participants');
 
-    if (!participantExists) {
-      return res.status(422).send({ error: 'Remetente não encontrado na lista de participantes.' });
+        // verifica se o participante existe na lista de participantes
+        const participantExists = await participantsCollection.findOne({ participants: { $in: [from] } });
+
+        // ele nao ta na lista
+        if (!participantExists) {
+            return res.status(422).send({ error: 'Remetente não encontrado na lista de participantes.' });
+        }
+
+        // ele ta na lista
+        const listaParaEnviar = {
+            from: from,
+            to: to,
+            text: text,
+            type: type,
+            time: horario
+        }
+
+        await db.collection("messages").insertOne(listaParaEnviar);
+        return res.sendStatus(201);
+
+
+
+    } catch (err) {
+        res.status(500).send(err.massage);
     }
-    
+
 
 })
 
