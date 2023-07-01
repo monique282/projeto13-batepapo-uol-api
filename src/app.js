@@ -73,7 +73,7 @@ app.post("/participants", async (req, res) => {
             from: name,
             to: 'Todos',
             text: 'entra na sala...',
-            type: 'message',
+            type: 'status',
             time: dayjs().format('HH:mm:ss')
         }
         await db.collection("messages").insertOne(messages);
@@ -89,21 +89,20 @@ app.post("/participants", async (req, res) => {
 app.post("/messages", async (req, res) => {
 
     const { to, text, type } = req.body;
-    const { from } = req.headers;
+    const { user } = req.headers;
 
     // verificar se os estao validos
     const camposDasMensagens = joi.object({
-        to: joi.string().required(),
-        text: joi.string().required(),
-        type: joi.valid('message', 'private_message').required(),
-        from: joi.string()
+        to: joi.string().min(1).required(),
+        text: joi.string().min(1).required(),
+        type: joi.valid('message', 'private_message').required()
     })
 
     const validarCamposDasMensagens = camposDasMensagens.validate(req.body, { abortEarly: false });
     // o abortEarly ser pra procurar todos os requisitos que nao passou no joi
     if (validarCamposDasMensagens.error) {
         const errocamposDasMensagens = validarCamposDasMensagens.error.details.map(qual => qual.message);
-        return res.sendStatus(422).send(errocamposDasMensagens);
+        return res.status(422).send(errocamposDasMensagens);
     }
 
     try {
@@ -120,7 +119,7 @@ app.post("/messages", async (req, res) => {
 
         // ele ta na lista
         const listaParaEnviar = {
-            from: from,
+            from: participantExists.name,
             to: to,
             text: text,
             type: type,
@@ -146,10 +145,13 @@ app.get("/messages", (red, res) => {
         if (participants.length === 0) {
             return res.send([]);
         } else {
-            listaPaticipantes = participants.slice();
-            //tenho que verificar quais deles foram privado
-            console.log(listaPaticipantes)
-            return res.send(listaPaticipantes);
+           // Filtrar os objetos com "type" igual a "status"
+            const statusMessagens = participants.filter(obj => obj.type === "message");
+            //const messagensPrivadas = statusMessagens.filter(obj => obj.type === "message");
+            // listaPaticipantes = participants.slice();
+            // console.log(listaPaticipantes);
+           // console.log(statusMessages);
+            return res.send(statusMessagens);
         }
     })
     promise.catch(err => {
