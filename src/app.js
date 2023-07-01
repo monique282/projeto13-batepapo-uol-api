@@ -13,20 +13,17 @@ const horario = dayjs().format('HH:mm:ss');
 const port = 5000;
 
 // array de todos os participantes
-let participantes = [];
+let listaPaticipantes = [];
 
 // cerve pra deixar a aplicação ligada na porta escolhida
 app.listen(port, () => console.log(`servidor esta rodando na porta ${port}`));
 
 // conexão com o banco de dados
 const mongoClient = new MongoClient(process.env.DATABASE_URL);
-
 let db;
 mongoClient.connect()
     .then(() => db = mongoClient.db())
     .catch((err) => console.log(err.massage));
-
-let listaPaticipantes = [];
 
 //buscando a lista de participantes
 app.get("/participants", (red, res) => {
@@ -36,7 +33,7 @@ app.get("/participants", (red, res) => {
             return res.send([]);
         } else {
             listaPaticipantes = participants.slice();
-            return res.send(listaPaticipantes);
+            return res.send(listaPaticipantes.name);
         }
     })
     promise.catch(err => {
@@ -91,7 +88,7 @@ app.post("/participants", async (req, res) => {
     }
 });
 
-app.post("/messages", (req, res) => {
+app.post("/messages", async (req, res) => {
 
     const { to, text, type } = req.body;
     const { from } = req.headers.user;
@@ -103,14 +100,21 @@ app.post("/messages", (req, res) => {
         type: joi.valid('message', 'private_message').required()
     })
 
-    const participantPromise = db.collection("participants").find();
-    console.log(participantPromise);
+    const validarCamposDasMensagens= camposDasMensagens.validate(req.body, { abortEarly: false });
     // o abortEarly ser pra procurar todos os requisitos que nao passou no joi
-    // if (validarNome.error) {
-    //     const erroNome = validarNome.error.details.map(qual => qual.message);
-    //     return res.sendStatus(422).send(erroNome);
-    // }
+    if (validarCamposDasMensagens.error) {
+        const errocamposDasMensagens = validarCamposDasMensagens.error.details.map(qual => qual.message);
+        return res.sendStatus(422).send(erroNome);
+    }
+    const participantsCollection = db.collection('/participants');
 
+    // Verifica se o participante existe na lista de participantes
+    const participantExists = await participantsCollection.findOne({ participants: { $in: [from] } });
+
+    if (!participantExists) {
+      return res.status(422).send({ error: 'Remetente não encontrado na lista de participantes.' });
+    }
+    
 
 })
 
