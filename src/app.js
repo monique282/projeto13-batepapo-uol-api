@@ -2,7 +2,8 @@ import express from "express";
 import cors from "cors";
 import { MongoClient } from "mongodb";
 import dotenv from "dotenv";
-import dayjs from "dayjs"
+import dayjs from "dayjs";
+import joi from "joi";
 
 const app = express();
 app.use(cors());
@@ -13,8 +14,8 @@ const port = 5000;
 
 // array de todos os participantes
 let participantes = [];
-// cerve pra deixar a aplicação ligada na porta escolhida
 
+// cerve pra deixar a aplicação ligada na porta escolhida
 app.listen(port, () => console.log(`servidor esta rodando na porta ${port}`));
 
 // conexão com o banco de dados
@@ -22,7 +23,6 @@ const mongoClient = new MongoClient(process.env.DATABASE_URL);
 
 let db;
 mongoClient.connect()
-
     .then(() => db = mongoClient.db())
     .catch((err) => console.log(err.massage));
 
@@ -34,8 +34,7 @@ app.get("/participants", (red, res) => {
     promise.then(participants => {
         if (participants.length === 0) {
             return res.send([]);
-        }
-        else {
+        } else {
             listaPaticipantes = participants.slice();
             return res.send(listaPaticipantes);
         }
@@ -47,12 +46,20 @@ app.get("/participants", (red, res) => {
 
 // adicionar participantes
 app.post("/participants", async (req, res) => {
-
     const { name } = req.body;
-    // verificar se o nome esta como uma estringue vazia
-    if (!name) return res.sendStatus(422);
 
-    // esse try serve pra requisições se a requisição deu certo roda o try se nao roda o catch
+    // verificar se o nome esta como uma estringue vazia
+    const seNaoTemNome = joi.object({
+        name: joi.required()
+    })
+    const validarNome = seNaoTemNome.validate(req.object, {abortEarly: false}); 
+    // o abortEarly ser pra procurar todos os requisitos que nao passou no joi
+   if(validarNome.error){
+    const erroNome = validarNome.error.details.map(qual => detail.message);
+    return res.sendStatus(422).send(erroNome);
+   }
+
+    // esse try serve pra requisições, se a requisição deu certo roda o try se nao roda o catch
     try {
         // verificar se o nome ja exixte 
         const participantPromise = await db.collection("participants").findOne({ name: name });
@@ -64,9 +71,10 @@ app.post("/participants", async (req, res) => {
         const nomeUsuario = {
             name: req.body.name,
             lastStatus: Date.now()
-        }
+        };
         const promise = await db.collection("participants").insertOne(nomeUsuario);
-        // adicionar a mensagem em massages
+
+        // adicionar a massages em massages
         const messages = {
             from: name,
             to: 'Todos',
@@ -74,18 +82,14 @@ app.post("/participants", async (req, res) => {
             type: 'status',
             time: horario
         }
-        const mensagePromise = await db.collection("messages").insertOne(messages);
+        await db.collection("messages").insertOne(messages);
         return res.sendStatus(201);
 
-    // esse catch serve pra qualquer requisição que deu erro 
+        // esse catch serve pra qualquer requisição que deu erro 
     } catch (err) {
         res.status(500).send(err.massage);
     }
-
 });
-
-
-
 
 // app.post("/messages", (req, res) => {
 
