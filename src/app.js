@@ -9,7 +9,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 dotenv.config();
-const horario = dayjs().format('HH:mm:ss');
 const port = 5000;
 
 // array de todos os participantes
@@ -75,7 +74,7 @@ app.post("/participants", async (req, res) => {
             to: 'Todos',
             text: 'entra na sala...',
             type: 'status',
-            time: horario
+            time: dayjs().format('HH:mm:ss')
         }
         await db.collection("messages").insertOne(messages);
         return res.sendStatus(201);
@@ -124,7 +123,7 @@ app.post("/messages", async (req, res) => {
             to: to,
             text: text,
             type: type,
-            time: horario
+            time: dayjs().format('HH:mm:ss')
         }
 
         await db.collection("messages").insertOne(listaParaEnviar);
