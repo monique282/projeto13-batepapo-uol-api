@@ -94,9 +94,9 @@ app.post("/messages", async (req, res) => {
 
     // verificar se os estao validos
     const camposDasMensagens = joi.object({
-        to: joi.string().required(),
-        text: joi.string().required(),
-        type: joi.valid('message', 'private_message').required()
+        to: joi.string().min(1).required(),
+        text: joi.string().min(1).required(),
+        type: joi.valid('message', 'private_message').min(1).required()
     })
 
     const validarCamposDasMensagens = camposDasMensagens.validate(req.body, { abortEarly: false });
