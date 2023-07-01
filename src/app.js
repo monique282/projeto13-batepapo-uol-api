@@ -20,7 +20,7 @@ const mongoClient = new MongoClient(process.env.DATABASE_URL);
 let db;
 mongoClient.connect()
     .then(() => db = mongoClient.db())
-    .catch((err) => console.log(err.massage));
+    .catch((err) => console.log(err.message));
 let listaPaticipantes = [];
 //buscando a lista de participantes
 app.get("/participants", (red, res) => {
@@ -34,7 +34,7 @@ app.get("/participants", (red, res) => {
         }
     })
     promise.catch(err => {
-        return res.status(500).send(err.massage);
+        return res.status(500).send(err.message);
     })
 });
 
@@ -81,7 +81,7 @@ app.post("/participants", async (req, res) => {
 
         // esse catch serve pra qualquer requisição que deu erro 
     } catch (err) {
-        res.status(500).send(err.massage);
+        res.status(500).send(err.message);
     }
 });
 
@@ -130,11 +130,25 @@ app.post("/messages", async (req, res) => {
         return res.sendStatus(201);
 
     } catch (err) {
-        res.status(500).send(err.massage);
+        res.status(500).send(err.message);
+    }
+})
+
+app.get("/messages", async (red, res) => {
+
+    // so vai aparecer na tela dele 
+    // o que for todos
+    // o que for private_message que foi enviado por ele e o que que foi recebido pra ele
+
+
+    try {
+        const promise = await db.collection("messages").find().toArray();
+        res.send("ok");
+    } catch (err) {
+        res.status(500).send(err.message);
     }
 
-
-})
+});
 
 
 
