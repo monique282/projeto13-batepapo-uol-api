@@ -125,10 +125,8 @@ app.post("/messages", async (req, res) => {
             type: type,
             time: dayjs().format('HH:mm:ss')
         }
-
         await db.collection("messages").insertOne(listaParaEnviar);
         return res.sendStatus(201);
-
 
     } catch (err) {
         return res.status(500).send(err.message);
@@ -164,11 +162,21 @@ app.get("/messages", async (req, res) => {
     } catch (err) {
         return res.status(500).send(err.message);
     }
-
-
-
 });
 
+app.post("/status", async (req, res) => {
+    const { user } = req.headers;
+    console.log(user);
+ if (!user){
+    return res.sendStatus(404);
+ }else{
+
+
+
+ }
+ return res.sendStatus(200);
+
+})
 
 
 
