@@ -47,7 +47,7 @@ app.get("/participants", (red, res) => {
 app.post("/participants", (req, res) => {
     const { name } = req.body;
     // verificar se o nome esta como uma estringue vazia
-    if (name === "") {
+    if (!name) {
         return res.sendStatus(422);
     }
     // verificar se o nome ja exixte 
