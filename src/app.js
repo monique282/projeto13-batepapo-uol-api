@@ -111,7 +111,7 @@ app.post("/messages", async (req, res) => {
         const participantsCollection = db.collection('participants');
 
         // verifica se o participante existe na lista de participantes
-        const participantExists = await participantsCollection.findOne({ participantsCollection: { $in: [from] } });
+        const participantExists = await participantsCollection.findOne({ participantsCollection: { $in: [user] } });
 
         // ele nao ta na lista
         if (!participantExists) {
