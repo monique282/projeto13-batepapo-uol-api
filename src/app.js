@@ -140,13 +140,23 @@ app.get("/messages", async (req, res) => {
     const { user } = req.headers;
     const { limit } = req.query;
     console.log(limit);
+    const quantidadeDeMensagemNaTela = joi.object({
+        limit: joi.number().min(1)
+    })
+
+    const seEValido = quantidadeDeMensagemNaTela.validate(req.query, { abortEarly: false });
+    // o abortEarly ser pra procurar todos os requisitos que nao passou no joi
+    if (seEValido.error) {
+        const erroLimit = seEValido.error.details.map(qual => qual.message);
+        return res.status(422).send(erroLimit);
+    
+    }
     try {
         const listaFiltradaDoUsuarioLogado = await db.collection("messages").find({ $or: [{ to: "Todos" }, { to: user }, { from: user }] }).toArray();
         return res.send(listaFiltradaDoUsuarioLogado);
 
     } catch (err) {
         return res.status(500).send(err.message);
-
     }
 
 
