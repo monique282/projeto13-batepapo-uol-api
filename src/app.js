@@ -45,7 +45,7 @@ app.post("/participants", async (req, res) => {
 
     // verificar se o nome esta como uma estringue vazia
     const seNaoTemNome = joi.object({
-        name: joi.required()
+        name: joi.string().min(1).required()
     })
     const validarNome = seNaoTemNome.validate(req.body, { abortEarly: false });
     // o abortEarly ser pra procurar todos os requisitos que nao passou no joi
