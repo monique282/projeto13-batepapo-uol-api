@@ -73,7 +73,7 @@ app.post("/participants", async (req, res) => {
             from: name,
             to: 'Todos',
             text: 'entra na sala...',
-            type: 'status',
+            type: 'message',
             time: dayjs().format('HH:mm:ss')
         }
         await db.collection("messages").insertOne(messages);
@@ -110,7 +110,7 @@ app.post("/messages", async (req, res) => {
         const participantsCollection = db.collection('participants');
 
         // verifica se o participante existe na lista de participantes
-        const participantExists = await participantsCollection.findOne({ participants: { $in: [from] } });
+        const participantExists = await participantsCollection.findOne({ participantsCollection: { $in: [from] } });
 
         // ele nao ta na lista
         if (!participantExists) {
@@ -134,19 +134,26 @@ app.post("/messages", async (req, res) => {
     }
 })
 
-app.get("/messages", async (red, res) => {
+app.get("/messages", (red, res) => {
 
     // so vai aparecer na tela dele 
     // o que for todos
     // o que for private_message que foi enviado por ele e o que que foi recebido pra ele
 
-
-    try {
-        const promise = await db.collection("messages").find().toArray();
-        res.send("ok");
-    } catch (err) {
-        res.status(500).send(err.message);
-    }
+    const promise = db.collection("messages").find().toArray()
+    promise.then(participants => {
+        if (participants.length === 0) {
+            return res.send([]);
+        } else {
+            listaPaticipantes = participants.slice();
+            //tenho que verificar quais deles foram privado
+            console.log(listaPaticipantes)
+            return res.send(listaPaticipantes);
+        }
+    })
+    promise.catch(err => {
+        return res.status(500).send(err.message);
+    })
 
 });
 
