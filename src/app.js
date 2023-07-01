@@ -13,18 +13,16 @@ const horario = dayjs().format('HH:mm:ss');
 const port = 5000;
 
 // array de todos os participantes
-let listaPaticipantes = [];
-
+let participantes = [];
 // cerve pra deixar a aplicação ligada na porta escolhida
 app.listen(port, () => console.log(`servidor esta rodando na porta ${port}`));
-
 // conexão com o banco de dados
 const mongoClient = new MongoClient(process.env.DATABASE_URL);
 let db;
 mongoClient.connect()
     .then(() => db = mongoClient.db())
     .catch((err) => console.log(err.massage));
-
+let listaPaticipantes = [];
 //buscando a lista de participantes
 app.get("/participants", (red, res) => {
     const promise = db.collection("participants").find().toArray()
@@ -33,7 +31,7 @@ app.get("/participants", (red, res) => {
             return res.send([]);
         } else {
             listaPaticipantes = participants.slice();
-            return res.send(listaPaticipantes.name);
+            return res.send(listaPaticipantes);
         }
     })
     promise.catch(err => {
@@ -130,8 +128,6 @@ app.post("/messages", async (req, res) => {
 
         await db.collection("messages").insertOne(listaParaEnviar);
         return res.sendStatus(201);
-
-
 
     } catch (err) {
         res.status(500).send(err.massage);
