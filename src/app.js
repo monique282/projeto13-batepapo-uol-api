@@ -149,15 +149,22 @@ app.get("/messages", async (req, res) => {
     if (seEValido.error) {
         const erroLimit = seEValido.error.details.map(qual => qual.message);
         return res.status(422).send(erroLimit);
-    
+
     }
     try {
         const listaFiltradaDoUsuarioLogado = await db.collection("messages").find({ $or: [{ to: "Todos" }, { to: user }, { from: user }] }).toArray();
-        return res.send(listaFiltradaDoUsuarioLogado);
+        let listaPraMostrar = [];
+        if (listaFiltradaDoUsuarioLogado.length > limit) {
+            listaPraMostrar = listaFiltradaDoUsuarioLogado.slice(listaFiltradaDoUsuarioLogado.length - limit); // Obtém apenas os  ultimos desejados da lista
+        } else {
+            listaPraMostrar = listaFiltradaDoUsuarioLogado.slice();
+        }
+        return res.send(listaPraMostrar);
 
     } catch (err) {
         return res.status(500).send(err.message);
     }
+
 
 
 });
