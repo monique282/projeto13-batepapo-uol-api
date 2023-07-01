@@ -43,52 +43,47 @@ app.get("/participants", (red, res) => {
     })
 });
 
+// adicionar participantes
+app.post("/participants", async (req, res) => {
 
-app.post("/participants", (req, res) => {
     const { name } = req.body;
     // verificar se o nome esta como uma estringue vazia
-    if (!name) {
-        return res.sendStatus(422);
-    }
-    // verificar se o nome ja exixte 
-    const participantPromise = db.collection("participants").findOne({ name: name });
-    participantPromise.then((participant) => {
-        if (participant) {
-            // existe esse nome cadastrado
-            return res.sendStatus(409);
-            // se nao exixtir esse nome cadastrado vai fazer isso
-        }
+    if (!name) return res.sendStatus(422);
+
+    // esse try serve pra requisições se a requisição deu certo roda o try se nao roda o catch
+    try {
+        // verificar se o nome ja exixte 
+        const participantPromise = await db.collection("participants").findOne({ name: name });
+
+        // existe esse nome cadastrado
+        if (participantPromise) return res.sendStatus(409);
+
+        // se nao exixtir esse nome cadastrado vai fazer isso
         const nomeUsuario = {
             name: req.body.name,
             lastStatus: Date.now()
         }
-        const promise = db.collection("participants").insertOne(nomeUsuario);
-        promise.then(() => {
-            return res.sendStatus(201);
-        })
-        promise.catch(err => {
-            return res.status(500).send(err.massage);
-        });
-    })
-    participantPromise.catch((err) => {
-        return res.status(500).send(err.message);
-    });
+        const promise = await db.collection("participants").insertOne(nomeUsuario);
+        // adicionar a mensagem em massages
+        const messages = {
+            from: name,
+            to: 'Todos',
+            text: 'entra na sala...',
+            type: 'status',
+            time: horario
+        }
+        const mensagePromise = await db.collection("messages").insertOne(messages);
+        return res.sendStatus(201);
 
-    const mensagem  = {
-        from: name,
-        to: 'Todos',
-        text: 'entra na sala...',
-        type: 'status',
-        time: horario
+    // esse catch serve pra qualquer requisição que deu erro 
+    } catch (err) {
+        res.status(500).send(err.massage);
     }
-    const mensagePromise = db.collection("messages").insertOne(mensagem);
-    mensagePromise.then(() => {
 
-    })
-    mensagePromise.catch(err => {
-        return res.status(500).send(err.massage);
-    });
-})
+});
+
+
+
 
 // app.post("/messages", (req, res) => {
 
