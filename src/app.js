@@ -55,7 +55,7 @@ app.post("/participants", async (req, res) => {
     const validarNome = seNaoTemNome.validate(req.object, {abortEarly: false}); 
     // o abortEarly ser pra procurar todos os requisitos que nao passou no joi
    if(validarNome.error){
-    const erroNome = validarNome.error.details.map(qual => detail.message);
+    const erroNome = validarNome.error.details.map(qual => qual.message);
     return res.sendStatus(422).send(erroNome);
    }
 
@@ -91,13 +91,14 @@ app.post("/participants", async (req, res) => {
     }
 });
 
-// app.post("/messages", (req, res) => {
+app.post("/messages", (req, res) => {
 
-//     const { to } = req.body;
-//     const { text } = req.body;
-//     const { type } = req.body;
+    const { to } = req.body;
+    const { text } = req.body;
+    const { type } = req.body;
 
-// })
+
+})
 
 
 
