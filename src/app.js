@@ -86,18 +86,11 @@ app.post("/participants", async (req, res) => {
     }
 });
 
-const mongoClientM = new MongoClient(process.env.DATABASE_URLM);
-let dbm;
-mongoClientM.connect()
-    .then(() => dbm = mongoClientM.db())
-    .catch((err) => console.log(err.massage));
 
 app.post("/messages", async (req, res) => {
 
     const { to, text, type } = req.body;
     const { from } = req.headers;
-
-
 
     // verificar se os estao validos
     const camposDasMensagens = joi.object({
@@ -134,7 +127,7 @@ app.post("/messages", async (req, res) => {
             time: horario
         }
 
-        await dbm.collection("messages").insertOne(listaParaEnviar);
+        await db.collection("messages").insertOne(listaParaEnviar);
         return res.sendStatus(201);
 
     } catch (err) {
