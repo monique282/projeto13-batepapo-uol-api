@@ -95,7 +95,8 @@ app.post("/messages", async (req, res) => {
     const camposDasMensagens = joi.object({
         to: joi.string().required(),
         text: joi.string().required(),
-        type: joi.valid('message', 'private_message').required()
+        type: joi.valid('message', 'private_message').required(),
+        from: joi.string()
     })
 
     const validarCamposDasMensagens = camposDasMensagens.validate(req.body, { abortEarly: false });
