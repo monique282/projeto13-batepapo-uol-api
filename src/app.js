@@ -138,11 +138,13 @@ app.post("/messages", async (req, res) => {
 app.get("/messages", async (req, res) => {
 
     const { user } = req.headers;
-const {limit} =  req.query;
+    const { limit } = req.query;
+    console.log(limit);
     try {
         const listaFiltradaDoUsuarioLogado = await db.collection("messages").find({ $or: [{ to: "Todos" }, { to: user }, { from: user }] }).toArray();
+        return res.send(listaFiltradaDoUsuarioLogado);
 
-    } catch (err){
+    } catch (err) {
         return res.status(500).send(err.message);
 
     }
