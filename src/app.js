@@ -27,11 +27,13 @@ mongoClient.connect()
     .catch((err) => console.log(err.massage));
 
 let listaPaticipantes = [];
+
+//buscando a lista de participantes
 app.get("/participants", (red, res) => {
     const promise = db.collection("participants").find().toArray()
     promise.then(participants => {
         if (participants.length === 0) {
-            return console.log([])
+            return res.send([]);
         }
         else {
             listaPaticipantes = participants.slice();
