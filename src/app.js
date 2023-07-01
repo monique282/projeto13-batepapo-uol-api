@@ -129,6 +129,7 @@ app.post("/messages", async (req, res) => {
         await db.collection("messages").insertOne(listaParaEnviar);
         return res.sendStatus(201);
 
+        
     } catch (err) {
         res.status(500).send(err.message);
     }
