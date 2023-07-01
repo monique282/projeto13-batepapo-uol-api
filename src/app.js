@@ -102,7 +102,7 @@ app.post("/messages", async (req, res) => {
     // o abortEarly ser pra procurar todos os requisitos que nao passou no joi
     if (validarCamposDasMensagens.error) {
         const errocamposDasMensagens = validarCamposDasMensagens.error.details.map(qual => qual.message);
-        return res.sendStatus(422).send(erroNome);
+        return res.sendStatus(422).send(errocamposDasMensagens);
     }
 
     try {
