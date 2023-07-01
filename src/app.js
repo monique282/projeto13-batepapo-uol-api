@@ -23,7 +23,7 @@ mongoClient.connect()
     .catch((err) => console.log(err.message));
 let listaPaticipantes = [];
 //buscando a lista de participantes
-app.get("/participants", (red, res) => {
+app.get("/participants", (req, res) => {
     const promise = db.collection("participants").find().toArray()
     promise.then(participants => {
         if (participants.length === 0) {
@@ -135,10 +135,10 @@ app.post("/messages", async (req, res) => {
     }
 })
 
-app.get("/messages", async (red, res) => {
+app.get("/messages", async (req, res) => {
 
     const { user } = req.headers;
-
+const {limit} =  req.query;
     try {
         const listaFiltradaDoUsuarioLogado = await db.collection("messages").find({ $or: [{ to: "Todos" }, { to: user }, { from: user }] }).toArray();
 
