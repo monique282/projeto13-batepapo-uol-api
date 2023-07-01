@@ -52,12 +52,12 @@ app.post("/participants", async (req, res) => {
     const seNaoTemNome = joi.object({
         name: joi.required()
     })
-    const validarNome = seNaoTemNome.validate(req.object, {abortEarly: false}); 
+    const validarNome = seNaoTemNome.validate(req.body, { abortEarly: false });
     // o abortEarly ser pra procurar todos os requisitos que nao passou no joi
-   if(validarNome.error){
-    const erroNome = validarNome.error.details.map(qual => qual.message);
-    return res.sendStatus(422).send(erroNome);
-   }
+    if (validarNome.error) {
+        const erroNome = validarNome.error.details.map(qual => qual.message);
+        return res.sendStatus(422).send(erroNome);
+    }
 
     // esse try serve pra requisições, se a requisição deu certo roda o try se nao roda o catch
     try {
@@ -93,9 +93,23 @@ app.post("/participants", async (req, res) => {
 
 app.post("/messages", (req, res) => {
 
-    const { to } = req.body;
-    const { text } = req.body;
-    const { type } = req.body;
+    const { to, text, type } = req.body;
+    const { from } = req.headers.user;
+
+    // verificar se os estao validos
+    const camposDasMensagens = joi.object({
+        to: joi.string().required(),
+        text: joi.string().required(),
+        type: joi.valid('message', 'private_message').required()
+    })
+
+    const participantPromise = db.collection("participants").find();
+    console.log(participantPromise);
+    // o abortEarly ser pra procurar todos os requisitos que nao passou no joi
+    // if (validarNome.error) {
+    //     const erroNome = validarNome.error.details.map(qual => qual.message);
+    //     return res.sendStatus(422).send(erroNome);
+    // }
 
 
 })
