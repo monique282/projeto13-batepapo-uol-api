@@ -108,14 +108,13 @@ app.post("/messages", async (req, res) => {
 
     try {
         //pega a lista de participantes
-        const participantsCollection = db.collection('participants');
 
         // verifica se o participante existe na lista de participantes
-        const participantExists = await participantsCollection.findOne({ participantsCollection: { $in: [user] } });
+        const participantExists = await db.collection("participants").findOne({ name: user });
 
         // ele nao ta na lista
         if (!participantExists) {
-            return res.status(422).send({ error: 'Remetente não encontrado na lista de participantes.' });
+            return res.sendStatus(422);
         }
 
         // ele ta na lista
@@ -132,33 +131,22 @@ app.post("/messages", async (req, res) => {
 
 
     } catch (err) {
-        res.status(500).send(err.message);
+        return res.status(500).send(err.message);
     }
 })
 
-app.get("/messages", (red, res) => {
+app.get("/messages", async (red, res) => {
 
-    // so vai aparecer na tela dele 
-    // o que for todos
-    // o que for private_message que foi enviado por ele e o que que foi recebido pra ele
+    const { user } = req.headers;
 
-    const promise = db.collection("messages").find().toArray()
-    promise.then(mensagens => {
-        if (mensagens.length === 0) {
-            return res.send([]);
-        } else {
-            // Filtrar os objetos com "type" igual a "status"
-            const statusMessagens = mensagens.filter(obj => obj.to === "todos");
-            const messagensPrivadasEnviadasPorLogado = statusMessagens.filter(obj => obj.from === nomePessoaLogada);
-            // listaPaticipantes = participants.slice();
-            // console.log(listaPaticipantes);
-            // console.log(statusMessages);
-            return res.send(messagensPrivadasEnviadasPorLogado);
-        }
-    })
-    promise.catch(err => {
+    try {
+        const listaFiltradaDoUsuarioLogado = await db.collection("messages").find({ $or: [{ to: "Todos" }, { to: user }, { from: user }] }).toArray();
+
+    } catch (err){
         return res.status(500).send(err.message);
-    })
+
+    }
+
 
 });
 
