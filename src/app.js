@@ -11,7 +11,7 @@ app.use(express.json());
 dotenv.config();
 const port = 5000;
 
-// array de todos os participantes
+let nomePessoaLogada = "";
 let participantes = [];
 // cerve pra deixar a aplicação ligada na porta escolhida
 app.listen(port, () => console.log(`servidor esta rodando na porta ${port}`));
@@ -66,6 +66,7 @@ app.post("/participants", async (req, res) => {
             name: req.body.name,
             lastStatus: Date.now()
         };
+        nomePessoaLogada = req.body.name;
         const promise = await db.collection("participants").insertOne(nomeUsuario);
 
         // adicionar a massages em massages
@@ -129,7 +130,7 @@ app.post("/messages", async (req, res) => {
         await db.collection("messages").insertOne(listaParaEnviar);
         return res.sendStatus(201);
 
-        
+
     } catch (err) {
         res.status(500).send(err.message);
     }
@@ -142,17 +143,17 @@ app.get("/messages", (red, res) => {
     // o que for private_message que foi enviado por ele e o que que foi recebido pra ele
 
     const promise = db.collection("messages").find().toArray()
-    promise.then(participants => {
-        if (participants.length === 0) {
+    promise.then(mensagens => {
+        if (mensagens.length === 0) {
             return res.send([]);
         } else {
-           // Filtrar os objetos com "type" igual a "status"
-            const statusMessagens = participants.filter(obj => obj.type === "message");
-            //const messagensPrivadas = statusMessagens.filter(obj => obj.type === "message");
+            // Filtrar os objetos com "type" igual a "status"
+            const statusMessagens = mensagens.filter(obj => obj.to === "todos");
+            const messagensPrivadasEnviadasPorLogado = statusMessagens.filter(obj => obj.from === nomePessoaLogada);
             // listaPaticipantes = participants.slice();
             // console.log(listaPaticipantes);
-           // console.log(statusMessages);
-            return res.send(statusMessagens);
+            // console.log(statusMessages);
+            return res.send(messagensPrivadasEnviadasPorLogado);
         }
     })
     promise.catch(err => {
