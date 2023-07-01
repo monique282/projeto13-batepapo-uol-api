@@ -51,7 +51,7 @@ app.post("/participants", async (req, res) => {
     // o abortEarly ser pra procurar todos os requisitos que nao passou no joi
     if (validarNome.error) {
         const erroNome = validarNome.error.details.map(qual => qual.message);
-        return res.sendStatus(422).send(erroNome);
+        return res.status(422).send(erroNome);
     }
 
     // esse try serve pra requisições, se a requisição deu certo roda o try se nao roda o catch
@@ -86,10 +86,18 @@ app.post("/participants", async (req, res) => {
     }
 });
 
+const mongoClientM = new MongoClient(process.env.DATABASE_URLM);
+let dbm;
+mongoClientM.connect()
+    .then(() => dbm = mongoClientM.db())
+    .catch((err) => console.log(err.massage));
+
 app.post("/messages", async (req, res) => {
 
     const { to, text, type } = req.body;
-    const { from } = req.headers.user;
+    const { from } = req.headers;
+
+
 
     // verificar se os estao validos
     const camposDasMensagens = joi.object({
@@ -107,7 +115,7 @@ app.post("/messages", async (req, res) => {
 
     try {
         //pega a lista de participantes
-        const participantsCollection = db.collection('/participants');
+        const participantsCollection = db.collection('participants');
 
         // verifica se o participante existe na lista de participantes
         const participantExists = await participantsCollection.findOne({ participants: { $in: [from] } });
@@ -126,7 +134,7 @@ app.post("/messages", async (req, res) => {
             time: horario
         }
 
-        await db.collection("messages").insertOne(listaParaEnviar);
+        await dbm.collection("messages").insertOne(listaParaEnviar);
         return res.sendStatus(201);
 
     } catch (err) {
