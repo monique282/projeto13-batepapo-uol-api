@@ -199,7 +199,7 @@ setInterval(async () => {
                 to: 'Todos',
                 text: 'sai da sala...',
                 type: 'status',
-                time: 'HH:mm:ss'
+                time: dayjs().format('HH:mm:ss')
             }
             db.collection("messages").insertOne(atualizarOsQueSairam);
         }
