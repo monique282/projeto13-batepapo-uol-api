@@ -11,7 +11,7 @@ app.use(express.json());
 dotenv.config();
 const port = 5000;
 
-let nomePessoaLogada = "";
+
 let participantes = [];
 // cerve pra deixar a aplicação ligada na porta escolhida
 app.listen(port, () => console.log(`servidor esta rodando na porta ${port}`));
@@ -170,24 +170,38 @@ app.post("/status", async (req, res) => {
     if (!user) {
         return res.sendStatus(404);
     }
-        try {
-            const mudando = await db.collection("participants").findOne({ name: user });
-            if (!mudando) {
-                return res.sendStatus(404)
-            }
-            // atualizando o horario
-            await db.collection("participants").updateOne(
-                { name: user },
-                { $set: { lastStatus: Date.now() } }
-            )
-            return res.sendStatus(200);
-        } catch (err) {
-            return res.status(500).send(err.message);
+    try {
+        const mudando = await db.collection("participants").findOne({ name: user });
+        if (!mudando) {
+            return res.sendStatus(404)
         }
-
+        // atualizando o horario
+        await db.collection("participants").updateOne(
+            { name: user },
+            { $set: { lastStatus: Date.now() } }
+        )
+        return res.sendStatus(200);
+    } catch (err) {
+        return res.status(500).send(err.message);
+    }
 })
 
+setInterval(async () => {
+    let usuario = await db.collection("participants").find().toArray();
+    await db.collection("participants").deleteMany({ lastStatus: { $lt: Date.now() - 10000 } });
+    let usuariosNaoDeletados = await db.collection("participants").find().toArray();
 
+    for (let i=0 ; i< usuario.length; i++){
+        if(!usuariosNaoDeletados.includes(users[i])){
+            const atualizarOsQueSairam = {
+                type: 'status',
+                from: usuario[i].name,
+                text: 'sai da sala...'
+            }
+            db.collection("messages").insertOne(atualizarOsQueSairam)
+        }
+    }
+}, 15000);
 
 
 
