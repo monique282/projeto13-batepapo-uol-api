@@ -176,7 +176,7 @@ app.post("/status", async (req, res) => {
                 return res.sendStatus(404)
             }
             // atualizando o horario
-            await db.collection("participants").insertOne(
+            await db.collection("participants").updateOne(
                 { name: user },
                 { $set: { lastStatus: Date.now() } }
             )
