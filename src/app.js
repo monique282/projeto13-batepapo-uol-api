@@ -66,7 +66,6 @@ app.post("/participants", async (req, res) => {
             name: req.body.name,
             lastStatus: Date.now()
         };
-        nomePessoaLogada = req.body.name;
         const promise = await db.collection("participants").insertOne(nomeUsuario);
 
         // adicionar a massages em massages
@@ -192,7 +191,7 @@ setInterval(async () => {
     let usuariosNaoDeletados = await db.collection("participants").find().toArray();
 
     for (let i=0 ; i< usuario.length; i++){
-        if(!usuariosNaoDeletados.includes(users[i])){
+        if(!usuariosNaoDeletados.includes(usuario[i])){
             const atualizarOsQueSairam = {
                 type: 'status',
                 from: usuario[i].name,
