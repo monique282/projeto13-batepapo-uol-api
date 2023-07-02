@@ -187,23 +187,6 @@ app.post("/status", async (req, res) => {
 
 })
 
-setInterval(function () {
-    app.get("/participants", (req, res) => {
-        const promise = db.collection("participants").find().toArray()
-        promise.then(participants => {
-            if (participants.length === 0) {
-                return res.send([]);
-            } else {
-                listaPaticipantes = participants.slice();
-                return res.send(listaPaticipantes);
-            }
-        })
-        promise.catch(err => {
-            return res.status(500).send(err.message);
-        })
-    });
-
-}, 15000);
 
 
 
