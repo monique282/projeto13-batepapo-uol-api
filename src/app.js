@@ -85,7 +85,7 @@ app.post("/participants", async (req, res) => {
     }
 });
 
-
+// enviar uma mensagem
 app.post("/messages", async (req, res) => {
 
     const { to, text, type } = req.body;
@@ -130,8 +130,9 @@ app.post("/messages", async (req, res) => {
     } catch (err) {
         return res.status(500).send(err.message);
     }
-})
+});
 
+// buscar uma mensagem
 app.get("/messages", async (req, res) => {
 
     const { user } = req.headers;
@@ -187,17 +188,20 @@ app.post("/status", async (req, res) => {
 
 setInterval(async () => {
     let usuario = await db.collection("participants").find().toArray();
-    await db.collection("participants").deleteMany({ lastStatus: { $lt: Date.now() - 10000 } });
+    await db.collection("participants").deleteMany({ lastStatus: { $lt: Date.now() - 20000 } });
     let usuariosNaoDeletados = await db.collection("participants").find().toArray();
-
-    for (let i=0 ; i< usuario.length; i++){
-        if(!usuariosNaoDeletados.includes(usuario[i])){
+    console.log(usuario);
+    console.log(usuariosNaoDeletados);
+    for (let i = 0; i < usuario.length; i++) {
+        if (!usuariosNaoDeletados.includes(usuario[i])) {
             const atualizarOsQueSairam = {
-                type: 'status',
                 from: usuario[i].name,
-                text: 'sai da sala...'
+                to: 'Todos',
+                text: 'sai da sala...',
+                type: 'status',
+                time: 'HH:mm:ss'
             }
-            db.collection("messages").insertOne(atualizarOsQueSairam)
+            db.collection("messages").insertOne(atualizarOsQueSairam);
         }
     }
 }, 15000);
